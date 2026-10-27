@@ -5,6 +5,9 @@ Public, reusable agent skills by [David Broza](https://www.davidbroza.dev), shar
 | Skill | What it does |
 |---|---|
 | [bdd-refine](bdd-refine/SKILL.md) | Turns a rough product or feature idea into reviewed Gherkin `.feature` specs before any code is written. |
+| [bdd-spec-first](bdd-spec-first/SKILL.md) | Builds the feature from those specs: tests go red, then the LLM writes the steps and code until they're green. The LLM never edits the specs to make them pass. |
+
+The two skills work as a pair: run `bdd-refine` first, then `bdd-spec-first`.
 
 ## Use
 
