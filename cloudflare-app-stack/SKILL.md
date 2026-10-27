@@ -1,6 +1,6 @@
 ---
 name: cloudflare-app-stack
-description: Bootstrap, build and deploy a new TypeScript app, tool or PoC on Cloudflare Workers with an opinionated stack (TanStack Start, Drizzle + D1, R2, Durable Objects, Better Auth, AI SDK via AI Gateway, optional MCP endpoint), spec-first with BDD. Use when the user says "build an app", "make a tool", "prototype X", "new Cloudflare app" or "deploy to <subdomain>".
+description: Bootstrap, build and deploy a new TypeScript app, tool or PoC on Cloudflare Workers with an opinionated stack (TanStack Start, shadcn/ui + Tailwind from the first commit, mobile-first, Drizzle + D1, R2, Durable Objects, Better Auth, AI SDK via AI Gateway, optional MCP endpoint), spec-first with BDD. Use when the user says "build an app", "make a tool", "prototype X", "new Cloudflare app" or "deploy to <subdomain>".
 ---
 
 # cloudflare-app-stack
@@ -31,7 +31,7 @@ Echo the answers back as a short summary before writing any code.
 | Framework | TanStack Start, pinned, on Vite 8 |
 | ORM | Drizzle ORM by default (1.0 RC, pinned). Never raw SQL in app code. |
 | Offline | TanStack DB |
-| UI | shadcn/ui |
+| UI | shadcn/ui + Tailwind CSS v4, set up in the first commit, mobile-first. No hand-rolled CSS components. |
 | AI | AI SDK, model called through Cloudflare AI Gateway (provider chosen by the user) |
 | Auth | Better Auth for the app; OAuth for MCP clients |
 | MCP | Streamable HTTP at `/mcp`, where an AI-client interface is useful |
@@ -47,16 +47,42 @@ Pin exact versions for anything pre-1.0 or RC (TanStack Start, Drizzle, TanStack
 
 1. **Spec first.** Turn the idea into `.feature` files with `bdd-refine`; get them approved before code.
 2. **Scaffold** a TanStack Start app on Vite 8, add `@cloudflare/vite-plugin` and `wrangler` 4. Name the Worker `<app-slug>`.
-3. **Check limits** before creating resources: `wrangler d1 list` (Workers Free has a D1 database cap).
-4. **Create resources:** `wrangler d1 create <app-slug>-db`, `wrangler r2 bucket create <app-slug>-files` (if needed), and declare Durable Objects + migrations in `wrangler.jsonc`.
-5. **Drizzle:** schema in `src/db/schema.ts`, `drizzle-kit generate` for migrations, apply with `wrangler d1 migrations apply`.
-6. **Auth:** Better Auth with D1 via Drizzle, configured for the answer to question 4. If there is `/mcp`, enable its OAuth provider flow so AI clients can connect.
-7. **AI:** AI SDK with the provider routed through an AI Gateway (`<gateway-id>`). Use tool approval for anything that writes.
-8. **Secrets:** `wrangler secret put <NAME>` for each key; local dev values in `.dev.vars` (gitignored).
-9. **Custom domain:** route `<app>.<your-domain>` to the Worker (`routes` / custom domain in `wrangler.jsonc`).
-10. **Tests:** wire the BDD harness from `bdd-spec-first`, add `/api/health`, and add the migrations-import guard test (below).
-11. **CI:** GitHub Actions running typecheck, unit and BDD tests on every push and PR. Deploy from CI only if the user wants it; that needs a `CLOUDFLARE_API_TOKEN` repo secret.
-12. **Deploy** with `just deploy` and run the checklist.
+3. **shadcn/ui right away, in the same first commit** (see "UI: shadcn/ui from day one" below). Never start with plain CSS and "add a UI library later".
+4. **Check limits** before creating resources: `wrangler d1 list` (Workers Free has a D1 database cap).
+5. **Create resources:** `wrangler d1 create <app-slug>-db`, `wrangler r2 bucket create <app-slug>-files` (if needed), and declare Durable Objects + migrations in `wrangler.jsonc`.
+6. **Drizzle:** schema in `src/db/schema.ts`, `drizzle-kit generate` for migrations, apply with `wrangler d1 migrations apply`.
+7. **Auth:** Better Auth with D1 via Drizzle, configured for the answer to question 4. If there is `/mcp`, enable its OAuth provider flow so AI clients can connect.
+8. **AI:** AI SDK with the provider routed through an AI Gateway (`<gateway-id>`). Use tool approval for anything that writes.
+9. **Secrets:** `wrangler secret put <NAME>` for each key; local dev values in `.dev.vars` (gitignored).
+10. **Custom domain:** route `<app>.<your-domain>` to the Worker (`routes` / custom domain in `wrangler.jsonc`).
+11. **Tests:** wire the BDD harness from `bdd-spec-first`, add `/api/health`, and add the migrations-import guard test (below).
+12. **CI:** GitHub Actions running typecheck, unit and BDD tests on every push and PR. Deploy from CI only if the user wants it; that needs a `CLOUDFLARE_API_TOKEN` repo secret.
+13. **Deploy** with `just deploy` and run the checklist.
+
+## UI: shadcn/ui from day one
+
+Every new app starts with shadcn/ui on Tailwind CSS v4 in the very first commit, before any screen is built.
+
+```sh
+bunx shadcn@latest init        # pick the TanStack Start / Vite template; writes components.json, Tailwind v4 setup, cn() helper
+bunx shadcn@latest add button input label card sheet drawer dialog tabs table badge skeleton sonner dropdown-menu
+```
+
+- Mount `<Toaster />` (sonner) once in the root route; use toasts for feedback, not `alert()`.
+- Build screens only from shadcn components plus Tailwind utilities. No hand-rolled CSS UI, no separate stylesheet per component, no second component library.
+- Theme through the CSS variables `shadcn init` creates (light and dark both work from the start).
+- Add more components with `bunx shadcn@latest add <name>` when needed; edit the copied component in `src/components/ui/` rather than wrapping it in custom CSS.
+
+### Mobile-first layout rules
+
+- Design for a ~390 px phone first, then widen with `sm:`/`md:`/`lg:` breakpoints.
+- Phones: primary navigation is a fixed bottom tab bar (3–5 items, icon + label). From `md:` up it can become a sidebar or top nav.
+- Respect safe areas: `viewport-fit=cover` in the viewport meta tag and `env(safe-area-inset-*)` padding on the bottom bar, top header and full-screen sheets.
+- Touch targets at least 44×44 px; inputs at least 16 px font so iOS doesn't zoom.
+- Filters, pickers and secondary actions open in a bottom `Drawer`/`Sheet` on phones, a `Dialog` or side panel on desktop.
+- Tables collapse to stacked cards (or scroll horizontally with a sticky first column) on narrow screens.
+- Use `Skeleton` for loading states; no layout jumps.
+- Before calling a UI done, screenshot it at phone width (390×844) and desktop width.
 
 ## Project layout
 
@@ -65,6 +91,7 @@ Pin exact versions for anything pre-1.0 or RC (TanStack Start, Drizzle, TanStack
   features/              .feature specs (human-owned) + step definitions
   src/
     routes/              TanStack Start routes, incl. api/health
+    components/ui/       shadcn/ui components (generated, then owned)
     server/              server functions, auth, mcp
     db/schema.ts         Drizzle schema
     durable/             Durable Object classes
@@ -85,6 +112,7 @@ Pin exact versions for anything pre-1.0 or RC (TanStack Start, Drizzle, TanStack
 - No secrets in the repo, logs or screenshots. Use `wrangler secret` and `.dev.vars`.
 - Keep `/api/health` cheap; it should also touch D1 so the smoke check proves the binding works.
 - Heavy CPU work goes to Rust/WASM, not long JS loops in the Worker.
+- UI is shadcn/ui + Tailwind only, mobile-first (see above).
 
 ## justfile sketch
 
@@ -104,6 +132,7 @@ Report each item before calling the first production deploy done:
 - [ ] Migrations-import guard passes; remote migrations applied
 - [ ] Secrets set with `wrangler secret put`; nothing sensitive committed
 - [ ] Custom domain resolves over HTTPS
+- [ ] UI is shadcn/ui throughout and checked at phone width (bottom tab bar, safe areas, 44 px targets)
 - [ ] `/api/health` returns 200 after deploy
 - [ ] Auth works for the chosen mode (sign-up / invite / SSO)
 - [ ] Email Sending verified from `<mail-domain>`
