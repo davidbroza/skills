@@ -1,0 +1,14 @@
+{
+  "name": "read-to-me",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "narrate": "bun run scripts/narrate.ts"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@types/bun": "^1.1.14",
+    "typescript": "^5.7.2"
+  }
+}

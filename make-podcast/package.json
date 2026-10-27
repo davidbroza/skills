@@ -1,0 +1,14 @@
+{
+  "name": "make-podcast",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "podcast": "bun run scripts/main.ts"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@types/bun": "^1.1.14",
+    "typescript": "^5.7.2"
+  }
+}
