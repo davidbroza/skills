@@ -32,7 +32,7 @@ Echo the answers back as a short summary before writing any code.
 | ORM | Drizzle ORM by default (1.0 RC, pinned). Never raw SQL in app code. |
 | Offline | TanStack DB |
 | UI | shadcn/ui + Tailwind CSS v4, set up in the first commit, mobile-first. No hand-rolled CSS components. |
-| AI | AI SDK, model called through Cloudflare AI Gateway (provider chosen by the user) |
+| AI | AI SDK, model called through Cloudflare AI Gateway with unified billing by default (provider/model chosen by the user). Do not use OpenRouter for new work. |
 | Auth | Better Auth for the app; OAuth for MCP clients |
 | MCP | Streamable HTTP at `/mcp`, where an AI-client interface is useful |
 | Email | Cloudflare Email Sending |
@@ -52,7 +52,7 @@ Pin exact versions for anything pre-1.0 or RC (TanStack Start, Drizzle, TanStack
 5. **Create resources:** `wrangler d1 create <app-slug>-db`, `wrangler r2 bucket create <app-slug>-files` (if needed), and declare Durable Objects + migrations in `wrangler.jsonc`.
 6. **Drizzle:** schema in `src/db/schema.ts`, `drizzle-kit generate` for migrations, apply with `wrangler d1 migrations apply`.
 7. **Auth:** Better Auth with D1 via Drizzle, configured for the answer to question 4. If there is `/mcp`, enable its OAuth provider flow so AI clients can connect.
-8. **AI:** AI SDK with the provider routed through an AI Gateway (`<gateway-id>`). Use tool approval for anything that writes.
+8. **AI:** AI SDK with the provider routed through an AI Gateway (`<gateway-id>`). Default to the gateway's unified billing (credits paid to Cloudflare, no separate provider key); don't route through OpenRouter for new work. Use tool approval for anything that writes.
 9. **Secrets:** `wrangler secret put <NAME>` for each key; local dev values in `.dev.vars` (gitignored).
 10. **Custom domain:** route `<app>.<your-domain>` to the Worker (`routes` / custom domain in `wrangler.jsonc`).
 11. **Tests:** wire the BDD harness from `bdd-spec-first`, add `/api/health`, and add the migrations-import guard test (below).
