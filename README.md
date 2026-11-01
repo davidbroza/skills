@@ -11,7 +11,7 @@ Public, reusable agent skills by [David Broza](https://www.davidbroza.dev), shar
 | [make-podcast](make-podcast/SKILL.md) | Turns any text into a two-host podcast episode (witty host + straight journalist) with ElevenLabs and ffmpeg. |
 | [post-mortem](post-mortem/SKILL.md) | Writes a blog post-mortem after a hard bug and feeds the lesson back into your agent tooling. |
 | [read-to-me](read-to-me/SKILL.md) | Narrates any text with ElevenLabs, optionally rewritten in a witty or news style; play, save or publish. |
-| [seo-audit](seo-audit/SKILL.md) | Walks through a site's SEO basics like a pro (intent, indexing, on-page, schema, Core Web Vitals, AI search, off-page, measurement) and returns a prioritized fix list, quick wins first. |
+| [seo-audit](seo-audit/SKILL.md) | Walks through a site's SEO basics like a pro (intent, indexing, on-page, schema, Core Web Vitals, AI/LLM crawlers and GEO, off-page, measurement) and returns a prioritized fix list, quick wins first. |
 | [skillchart](skillchart/SKILL.md) | Audits all installed agent skills and shows their context cost in an HTML dashboard. |
 
 `bdd-refine` and `bdd-spec-first` work as a pair: run `bdd-refine` first, then `bdd-spec-first`.
